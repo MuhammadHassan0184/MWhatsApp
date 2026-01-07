@@ -17,7 +17,7 @@ class SignupScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             SizedBox(height: 30),
+              SizedBox(height: 30),
 
               Center(
                 child: Icon(
@@ -32,7 +32,7 @@ class SignupScreen extends StatelessWidget {
 
               const Center(
                 child: Text(
-                  "Create Account ✨",
+                  "Create Account",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 30,
@@ -117,8 +117,12 @@ class SignupScreen extends StatelessWidget {
     );
   }
 
-  Widget _inputField(TextEditingController ctrl, String text, IconData icon,
-      {bool isPassword = false}) {
+  Widget _inputField(
+    TextEditingController ctrl,
+    String text,
+    IconData icon, {
+    bool isPassword = false,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -131,8 +135,10 @@ class SignupScreen extends StatelessWidget {
           hintText: text,
           prefixIcon: Icon(icon, color: Colors.grey[700]),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 20,
+          ),
         ),
       ),
     );

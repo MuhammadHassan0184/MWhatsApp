@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:mwhatsapp/controllers/login_controller.dart';
 import 'package:mwhatsapp/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +34,7 @@ class LoginScreen extends StatelessWidget {
 
               const Center(
                 child: Text(
-                  "Welcome Back 👋",
+                  "Welcome Back",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 30,
@@ -102,7 +104,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -110,8 +112,12 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _inputField(TextEditingController ctrl, String text, IconData icon,
-      {bool isPassword = false}) {
+  Widget _inputField(
+    TextEditingController ctrl,
+    String text,
+    IconData icon, {
+    bool isPassword = false,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -124,8 +130,10 @@ class LoginScreen extends StatelessWidget {
           hintText: text,
           prefixIcon: Icon(icon, color: Colors.grey[700]),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 20,
+          ),
         ),
       ),
     );

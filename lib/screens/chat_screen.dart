@@ -45,11 +45,11 @@ class _ChatScreenState extends State<ChatScreen> {
         .doc(chatId)
         .collection("messages")
         .add({
-      "senderId": _auth.currentUser!.uid,
-      "receiverId": widget.receiverId,
-      "message": msg,
-      "timestamp": FieldValue.serverTimestamp(),
-    });
+          "senderId": _auth.currentUser!.uid,
+          "receiverId": widget.receiverId,
+          "message": msg,
+          "timestamp": FieldValue.serverTimestamp(),
+        });
 
     _messageController.clear();
   }
@@ -61,13 +61,33 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 26, 26, 26),
       appBar: AppBar(
-        leading: IconButton(onPressed: (){
-          Navigator.pop(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HomeScreen()),
-                    );
-        }, icon: Icon(Icons.arrow_back, color: Colors.white,)),
-        title: Text(widget.receiverEmail, style: TextStyle(color: Colors.white),),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
+        title: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.receiverId)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return const Text("Chat", style: TextStyle(color: Colors.white));
+            }
+
+            final userData = snapshot.data!.data() as Map<String, dynamic>;
+            return Text(
+              userData['name'], // USER NAME ONLY
+              style: const TextStyle(color: Colors.white),
+            );
+          },
+        ),
+
         backgroundColor: const Color(0xff0B0B0B),
       ),
 
@@ -96,9 +116,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 // FIX: Snapshot has NO data
                 // --------------------
                 if (!snapshot.hasData) {
-                  return const Center(
-                    child: Text("No messages yet"),
-                  );
+                  return const Center(child: Text("No messages yet"));
                 }
 
                 final messages = snapshot.data!.docs;
@@ -111,8 +129,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     final bool isMe = data["senderId"] == currentUid;
 
                     return Align(
-                      alignment:
-                          isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment: isMe
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.symmetric(vertical: 5),
@@ -144,15 +163,11 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Expanded(
                   child: TextField(
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(color: Colors.white),
                     controller: _messageController,
                     decoration: InputDecoration(
                       hintText: "Message...",
-                      hintStyle: TextStyle(
-                        color: Colors.white
-                      ),
+                      hintStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: const Color.fromARGB(255, 69, 69, 69),
                       border: OutlineInputBorder(
@@ -182,4 +197,3 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
-

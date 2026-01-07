@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mwhatsapp/screens/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,6 +13,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int currentPage = 0;
+
+  final TextEditingController _searchController = TextEditingController();
+  String searchText = "";
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
         actions: [
           IconButton(
-            icon: const Icon(Icons.camera_alt_outlined,
-                color: Colors.white, size: 26),
+            icon: const Icon(
+              Icons.camera_alt_outlined,
+              color: Colors.white,
+              size: 26,
+            ),
             onPressed: () {},
           ),
           IconButton(
@@ -78,60 +83,64 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ListTile(
               leading: const Icon(Icons.person, color: Colors.white),
-              title: const Text("Profile",
-                  style: TextStyle(color: Colors.white)),
+              title: const Text(
+                "Profile",
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {},
             ),
 
             ListTile(
               leading: const Icon(Icons.settings, color: Colors.white),
-              title: const Text("Settings",
-                  style: TextStyle(color: Colors.white)),
+              title: const Text(
+                "Settings",
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {},
             ),
 
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title:
-                  const Text("Logout", style: TextStyle(color: Colors.red)),
+              title: const Text("Logout", style: TextStyle(color: Colors.red)),
               onTap: () async {
-  final shouldLogout = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text(
-        "Logout",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      content: const Text("Are you sure you want to logout?"),
-      actions: [
-        TextButton(
-          child: const Text("Cancel"),
-          onPressed: () => Navigator.pop(context, false),
-        ),
-        TextButton(
-          child: const Text(
-            "Logout",
-            style: TextStyle(color: Colors.red),
-          ),
-          onPressed: () => Navigator.pop(context, true),
-        ),
-      ],
-    ),
-  );
+                final shouldLogout = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text(
+                      "Logout",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    content: const Text("Are you sure you want to logout?"),
+                    actions: [
+                      TextButton(
+                        child: const Text("Cancel"),
+                        onPressed: () => Navigator.pop(context, false),
+                      ),
+                      TextButton(
+                        child: const Text(
+                          "Logout",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        onPressed: () => Navigator.pop(context, true),
+                      ),
+                    ],
+                  ),
+                );
 
-  if (shouldLogout == true) {
-    // Firebase logout
-    await FirebaseAuth.instance.signOut();
+                if (shouldLogout == true) {
+                  // Firebase logout
+                  await FirebaseAuth.instance.signOut();
 
-    // Navigate to LoginScreen
-    // ignore: use_build_context_synchronously
-    Navigator.pushAndRemoveUntil(context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
-  }
-},
-
+                  // Navigate to LoginScreen
+                  // ignore: use_build_context_synchronously
+                  Navigator.pushAndRemoveUntil(
+                    // ignore: use_build_context_synchronously
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                }
+              },
             ),
           ],
         ),
@@ -146,14 +155,20 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 40,
+            // height: 35,
             decoration: BoxDecoration(
               color: Colors.white10,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: const TextField(
-              style: TextStyle(color: Colors.white54, fontSize: 14),
-              decoration: InputDecoration(
+            child: TextField(
+              controller: _searchController,
+              style: const TextStyle(color: Colors.white54, fontSize: 14),
+              onChanged: (value) {
+                setState(() {
+                  searchText = value.toLowerCase();
+                });
+              },
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(borderSide: BorderSide.none),
                 prefixIcon: Icon(Icons.search, color: Colors.white),
                 hintText: "Ask Meta AI or Search",
@@ -161,9 +176,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-      
+
           const SizedBox(height: 20),
-      
+
           // ARCHIVED
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -183,79 +198,114 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-      
-          const SizedBox(height: 16),
-      
+
+          SizedBox(height: 16),
+
           // -----------------------------------
           // 🔥 FIRESTORE USER LIST (CHAT LIST)
           // -----------------------------------
           StreamBuilder<QuerySnapshot>(
-  stream: FirebaseFirestore.instance.collection('users').snapshots(),
-  builder: (context, snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
-      );
-    }
+            stream: FirebaseFirestore.instance.collection('users').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                );
+              }
 
-    if (!snapshot.hasData) {
-      return const Center(
-        child: Text("No Users Found",
-            style: TextStyle(color: Colors.white70, fontSize: 18)),
-      );
-    }
-     
-    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
-
-    // FILTER OUT LOGGED IN USER
-    final users = snapshot.data!.docs
-        .where((doc) => doc['uid'] != currentUserId)
-        .toList();
-
-    if (users.isEmpty) {
-      return const Center(
-        child: Text("No Users Found",
-            style: TextStyle(color: Colors.white70, fontSize: 18)),
-      );
-    }
-
-    return Expanded(
-      child: ListView.builder(
-        itemCount: users.length,
-        itemBuilder: (context, index) {
-          var data = users[index];
-
-          return ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, color: Colors.black),
-            ),
-            title: Text(
-              data['name'],
-              style: const TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            subtitle: Text(
-              data['email'],
-              style: const TextStyle(color: Colors.white54, fontSize: 14),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ChatScreen(
-                    receiverId: data['uid'],
-                    receiverEmail: data['email'],
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: Text(
+                    "No Users Found",
+                    style: TextStyle(color: Colors.white70, fontSize: 18),
                   ),
+                );
+              }
+
+              final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+              // FILTER OUT LOGGED IN USER
+              final users = snapshot.data!.docs.where((doc) {
+                if (doc['uid'] == currentUserId) return false;
+
+                final name = doc['name'].toString().toLowerCase();
+                final email = doc['email'].toString().toLowerCase();
+
+                return name.contains(searchText) || email.contains(searchText);
+              }).toList();
+
+              if (users.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "No Users Found",
+                    style: TextStyle(color: Colors.white70, fontSize: 18),
+                  ),
+                );
+              }
+
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    var data = users[index];
+
+                    return Dismissible(
+                      key: ValueKey(data['uid']),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        color: Colors.green,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(Icons.archive, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              "Archive",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      confirmDismiss: (direction) async {
+                        // Prevent auto delete
+                        return false;
+                      },
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.person, color: Colors.black),
+                        ),
+                        title: Text(
+                          data['name'],
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                        subtitle: Text(
+                          data['email'],
+                          style: TextStyle(color: Colors.white54, fontSize: 14),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChatScreen(
+                                receiverId: data['uid'],
+                                receiverEmail: data['email'],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
               );
             },
-          );
-        },
-      ),
-    );
-  },
-),
-
+          ),
         ],
       ),
 
@@ -276,16 +326,25 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.update_outlined), label: "Updates"),
+            icon: Icon(Icons.chat_bubble_outline),
+            label: "Chats",
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.call_outlined), label: "Calls"),
+            icon: Icon(Icons.update_outlined),
+            label: "Updates",
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.people_alt_outlined),
-              label: "Communities"),
+            icon: Icon(Icons.call_outlined),
+            label: "Calls",
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline), label: "Chats"),
+            icon: Icon(Icons.people_alt_outlined),
+            label: "Communities",
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined), label: "Settings"),
+            icon: Icon(Icons.settings_outlined),
+            label: "Settings",
+          ),
         ],
       ),
     );
