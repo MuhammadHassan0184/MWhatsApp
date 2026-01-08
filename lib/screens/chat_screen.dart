@@ -130,65 +130,71 @@ class _ChatScreenState extends State<ChatScreen> {
 
                     final messageId = messages[index].id;
 
-return Align(
-  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-  child: GestureDetector(
-    onLongPress: () {  // <-- changed from onTap to onLongPress
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Delete message", style: TextStyle(fontWeight: FontWeight.bold),),
-            content: Text("Do you want to delete this message?"),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text("Cancel"),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black
-                ),
-                onPressed: () async {
-                  await _firestore
-                      .collection("chats")
-                      .doc(chatId)
-                      .collection("messages")
-                      .doc(messageId)
-                      .delete();
-
-                  // ignore: use_build_context_synchronously
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  "Delete",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    },
-    child: Container(
-      padding: EdgeInsets.all(12),
-      margin: EdgeInsets.symmetric(vertical: 5),
-      decoration: BoxDecoration(
-        color: isMe ? Colors.teal : Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        data["message"],
-        style: TextStyle(
-          color: isMe ? Colors.white : Colors.black,
-        ),
-      ),
-    ),
-  ),
-);
-
+                    return Align(
+                      alignment: isMe
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: GestureDetector(
+                        onLongPress: () {
+                          // <-- changed from onTap to onLongPress
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text(
+                                  "Delete message",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                content: Text(
+                                  "Do you want to delete this message?",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text("Cancel"),
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black,
+                                    ),
+                                    onPressed: () async {
+                                      await _firestore
+                                          .collection("chats")
+                                          .doc(chatId)
+                                          .collection("messages")
+                                          .doc(messageId)
+                                          .delete();
+                                      // ignore: use_build_context_synchronously
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text(
+                                      "Delete",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(12),
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.teal : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            data["message"],
+                            style: TextStyle(
+                              color: isMe ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
                   },
                 );
               },
