@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          const SizedBox(height: 20),
+         SizedBox(height: 20),
 
           // ARCHIVED
           Padding(
@@ -324,7 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
             currentPage = value;
           });
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.chat_bubble_outline),
             label: "Chats",
